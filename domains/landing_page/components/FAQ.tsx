@@ -51,20 +51,8 @@ const faqs = [
     answer: "The Admin marks the term as completed, results are computed and released, and the next term becomes active. All previous records remain accessible in the Past Terms section."
   },
   {
-    question: "Is there a money-back guarantee?",
-    answer: "Yes. We offer a 30-day money-back guarantee on all paid plans if you're not satisfied with the service."
-  },
-  {
-    question: "How are teachers selected?",
-    answer: "All teachers are carefully vetted and formally assigned by the Admin to specific subjects and class arms each term. Only assigned teachers can interact with students."
-  },
-  {
     question: "Can I switch plans mid-term?",
     answer: "Yes. You can upgrade from Live to Hybrid (or VOD to Hybrid) at any time with prorated billing. Downgrades take effect at the start of the next term."
-  },
-  {
-    question: "Is my child’s data safe?",
-    answer: "Yes. We are fully NDPR compliant. All academic records are securely stored and scoped to each student. Parents control access and visibility."
   }
 ];
 

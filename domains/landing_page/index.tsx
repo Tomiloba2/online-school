@@ -19,8 +19,8 @@ export default function LandingPage(props: ILandingPageProps) {
                 <InstitutionalCore />
                 <ParentChildLayer />
                 <SubscriptionPlans />
-                <FAQ />
                 <FinalCTA />
+                <FAQ />
                 <Footer />
             </main>
         </div>

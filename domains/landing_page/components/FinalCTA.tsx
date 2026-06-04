@@ -4,8 +4,13 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import RoleSelectionModal from "./Modal";
+import { useRouter } from "next/navigation";
 
 export default function FinalCTA() {
+    const [openModal, setOpenModal] = useState(false);
+    const router = useRouter();
     return (
         <section className="bg-linear-to-r from-navy-400 to-navy-900 py-20 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(#ffffff15_1px,transparent_1px)] bg-size[50px_50px]"></div>
@@ -35,10 +40,8 @@ export default function FinalCTA() {
                         <Button
                             size="lg"
                             className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-12 py-7 rounded-2xl font-semibold shadow-xl shadow-blue-900/40 flex items-center gap-3 group"
-                            onClick={() => {
-                                const event = new CustomEvent('openRoleModal');
-                                window.dispatchEvent(event);
-                            }}
+                            onClick={() => { setOpenModal(true) }
+                            }
                         >
                             Enroll Now – It’s Free to Start
                             <ArrowRight className="group-hover:translate-x-1 transition-transform" />
@@ -47,10 +50,15 @@ export default function FinalCTA() {
 
                     <p className="text-sm text-white/60 pt-4">
                         No credit card required • Instant access to Free Tier •
-                        <span className="text-green-400"> 30-day guarantee on paid plans</span>
+                        <span className="te xt-green-400"> 30-day guarantee on paid plans</span>
                     </p>
                 </motion.div>
             </div>
+            <RoleSelectionModal isOpen={openModal} onClose={() => setOpenModal(false)}
+                onSelectRole={(role) => {
+                    if (role === "student") router.push("/sgnup/student")
+                    else if (role === "parent") router.push("/signup/parent")
+                }} />
         </section>
     );
 }

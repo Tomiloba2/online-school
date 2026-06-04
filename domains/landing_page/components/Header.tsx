@@ -150,7 +150,13 @@ export default function Header() {
       <RoleSelectionModal
         isOpen={roleModalOpen}
         onClose={() => setRoleModalOpen(false)}
-        onSelectRole={() => { }}
+        onSelectRole={(role) => {
+          if (role === "student") {
+            router.push("/signup/student");
+          } else if (role === "parent") {
+            router.push("/signup/parent");
+          }
+        }}
       />
     </header>
   );
