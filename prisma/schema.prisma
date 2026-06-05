@@ -32,7 +32,8 @@ model User {
   image         String?
   phoneNumber   String?
   role          Role
-  gender        Gender
+  gender        Gender?
+  terms         Boolean        @default(false)
   age           Int?
   dateOfBirth   DateTime?
   createdAt     DateTime       @default(now())

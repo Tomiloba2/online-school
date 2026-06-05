@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -22,47 +21,67 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { StudentSignupData, StudentSignupSchema } from "../schemas/student";
 import Image from "next/image";
+import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
+import PasswordField from "./PasswordField";
+import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 
 export default function StudentRegistrationForm() {
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const form = useForm<StudentSignupData>({
         resolver: zodResolver(StudentSignupSchema),
         defaultValues: {
             fullName: "",
             email: "",
-            password: ""
+            password: "",
+            terms: false
         },
     });
 
-    const onSubmit = async (values: StudentSignupData) => {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const formData = new FormData();
-            Object.entries(values).forEach(([key, value]) => {
-                formData.append(key, value);
+    const results = useMutation({
+        mutationFn: async (values: StudentSignupData) => {
+            try {
+                const data = await axios.post('/api/auth/student-signup', values)
+                return data.data
+            } catch (err: any) {
+                console.log(err);
+                throw err
+            }
+        },
+        mutationKey: ['parent-Signup'],
+        onSuccess: () => {
+            toast.success("Account created successfully!", {
+                description: "Welcome! Check your email to verify your account.",
+                duration: 5000,
             });
+            form.reset()
+            router.push("/login")
+        },
+        onError: (error) => {
 
-            const response = await fetch("/api/auth/register/student", {
-                method: "POST",
-                body: formData,
-            });
+            if (axios.isAxiosError(error)) {
 
-            const data = await response.json();
+                toast.error("Signup failed", {
+                    description:
+                        error.response?.data?.message ??
+                        error.message
+                })
 
-            if (!response.ok) throw new Error(data.error || "Registration failed");
-
-            router.push("/dashboard/student?welcome=true");
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setIsLoading(false);
+                return
+            }
+            toast.error("Signup failed")
         }
+    })
+    const onSubmit = async (values: StudentSignupData) => {
+        console.log(values)
+        console.log(form.formState.errors);
+
+
+        await results.mutate(values)
     };
 
     return (
@@ -116,33 +135,47 @@ export default function StudentRegistrationForm() {
                                 )}
                             />
 
+                            <PasswordField control={form.control} name="password" />
                             <FormField
                                 control={form.control}
-                                name="password"
+                                name="terms"
                                 render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-navy-700">Password</FormLabel>
+                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                                         <FormControl>
-                                            <Input type="password" placeholder="••••••••" className="h-12" {...field} />
+                                            <Checkbox
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                                className="border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white data-[state=checked]:border-blue-600"
+                                            />
                                         </FormControl>
-                                        <FormDescription>Minimum 8 characters with uppercase and number</FormDescription>
-                                        <FormMessage />
+                                        <div className="text-sm">
+                                            <FormLabel className="text-gray-600 font-normal">
+                                                I agree to the{" "}
+                                                <Link href="/terms" className="text-blue-600 hover:underline">
+                                                    Terms and Conditions
+                                                </Link>{" "}
+                                                and{" "}
+                                                <Link href="/privacy" className="text-blue-600 hover:underline">
+                                                    Privacy Policy
+                                                </Link>
+                                            </FormLabel>
+                                            <FormMessage />
+                                        </div>
                                     </FormItem>
                                 )}
                             />
-
-                            {error && (
+                            {results.error && (
                                 <Alert variant="destructive">
-                                    <AlertDescription>{error}</AlertDescription>
+                                    <AlertDescription>{(results.error as Error).message}</AlertDescription>
                                 </Alert>
                             )}
 
                             <Button
                                 type="submit"
                                 className="w-full h-14 text-lg bg-blue-600 hover:bg-blue-700 font-semibold"
-                                disabled={isLoading}
+                                disabled={results.isPending}
                             >
-                                {isLoading ? (
+                                {results.isPending ? (
                                     <>
                                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                                         Creating Account...
