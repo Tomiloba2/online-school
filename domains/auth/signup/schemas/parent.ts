@@ -11,6 +11,9 @@ export const ParentSignUpSchema = z.object({
         .regex(/[a-z]/, 'Must contain at least one lowercase letter')
         .regex(/[0-9]/, 'Must contain at least one number')
         .regex(/[@$!#^%*?&]/, 'Must contain at least one special character (@$!%*?&)'),
+    terms: z.boolean("You must accept the terms and conditions").refine((val) => val === true, {
+        message: "You must agree to the Terms and Conditions",
+    })
 });
 
 export type ParentSignUpData = z.infer<typeof ParentSignUpSchema>;
