@@ -23,11 +23,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { loginSchema, LoginValues } from "../schemas";
 import Image from "next/image";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginValues>({
@@ -38,37 +39,43 @@ export default function LoginPage() {
       rememberMe: false,
     },
   });
-
-  const onSubmit = async (values: LoginValues) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+  const results = useMutation({
+    mutationFn: async (values: LoginValues) => {
+      try {
+        const data = await axios.post('/api/auth/login', values)
+        return data.data
+      } catch (err: any) {
+        console.log(err);
+        throw err
+      }
+    },
+    mutationKey: ['login'],
+    onSuccess: () => {
+      toast.success("Login successful!", {
+        description: "Welcome back",
+        duration: 5000,
       });
+      form.reset()
+      router.push("/dashboard")
+    },
+    onError: (error) => {
 
-      const data = await response.json();
+      if (axios.isAxiosError(error)) {
 
-      if (!response.ok) {
-        throw new Error(data.error || "Invalid credentials");
+        toast.error("login failed", {
+          description:
+            error.response?.data?.message ??
+            error.message
+        })
+
+        return
       }
-
-      // Redirect based on role
-      if (data.role === "STUDENT") {
-        router.push("/dashboard/student");
-      } else if (data.role === "PARENT") {
-        router.push("/dashboard/parent");
-      } else {
-        router.push("/dashboard");
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
+      toast.error("Login failed")
     }
+  })
+  const onSubmit = async (values: LoginValues) => {
+
+    await results.mutate(values)
   };
 
   return (
@@ -140,18 +147,18 @@ export default function LoginPage() {
                 </Link>
               </div>
 
-              {error && (
+              {results.error && (
                 <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription>{(results.error as Error).message}</AlertDescription>
                 </Alert>
               )}
 
               <Button
                 type="submit"
                 className="w-full h-14 text-lg bg-blue-600 hover:bg-blue-700 font-semibold"
-                disabled={isLoading}
+                disabled={results.isPending}
               >
-                {isLoading ? (
+                {results.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Signing In...

@@ -52,7 +52,7 @@ export default function StudentRegistrationForm() {
                 throw err
             }
         },
-        mutationKey: ['parent-Signup'],
+        mutationKey: ['student-Signup'],
         onSuccess: () => {
             toast.success("Account created successfully!", {
                 description: "Welcome! Check your email to verify your account.",
