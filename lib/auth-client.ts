@@ -3,5 +3,7 @@ export const {
     signIn,
     signOut,
     useSession,
+    requestPasswordReset,
+    resetPassword
 } = createAuthClient({})
 

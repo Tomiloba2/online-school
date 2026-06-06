@@ -37,7 +37,7 @@ export const BaseEmail = ({
       <Preview>{previewText}</Preview>
       <Tailwind>
         <Body className="bg-zinc-50 font-sans">
-          <Container className="max-w-[600px] mx-auto bg-white rounded-2xl shadow-sm my-8 overflow-hidden">
+          <Container className="max-w-150 mx-auto bg-white rounded-2xl shadow-sm my-8 overflow-hidden">
             {/* Header */}
             <Section className="bg-navy-600 py-10 text-center">
               <Heading className="text-white text-3xl font-semibold m-0">

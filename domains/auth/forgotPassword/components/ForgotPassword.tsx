@@ -21,6 +21,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CheckCircle } from "lucide-react";
 import { ForgotPasswordData, ForgotPasswordSchema } from "../schema";
 import Image from "next/image";
+import { requestPasswordReset } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 
 export default function ForgotPassword() {
@@ -38,19 +40,19 @@ export default function ForgotPassword() {
     setError(null);
 
     try {
-      const response = await fetch("/api/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) throw new Error(data.error || "Failed to send reset link");
-
+      const { data, error } = await requestPasswordReset({
+        email: values.email,
+        redirectTo: "/reset-password"
+      })
+      if (error) throw error;
       setSuccess(true);
     } catch (err: any) {
-      setError(err.message);
+      toast.error("failed", {
+        duration: 5000,
+        description: err.message || 'An error occurred',
+      });
+
+      setError(err.message || 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +67,7 @@ export default function ForgotPassword() {
           <p className="text-gray-600 mt-4">
             We’ve sent a password reset link to your email. Please check your inbox (and spam folder).
           </p>
-          <Button asChild className="mt-8">
+          <Button asChild className="mt-8 bg-blue-600 hover:bg-blue-900">
             <Link href="/login">Back to Login</Link>
           </Button>
         </div>

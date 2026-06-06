@@ -22,9 +22,10 @@ import { Loader2, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { ResetPasswordData, ResetPasswordSchema } from "../schema";
 import Image from "next/image";
+import { resetPassword } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 export default function ResetPassword() {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
 
@@ -47,25 +48,29 @@ export default function ResetPassword() {
     }, [token]);
 
     const onSubmit = async (values: ResetPasswordData) => {
-        if (!token) return;
-
+        if (!token) {
+            toast.error("Password reset failed", {
+                duration: 5000,
+                description: "Invalid reset Link.",
+            });
+            return setError('Invalid reset link')
+        };
         setIsLoading(true);
         setError(null);
-
         try {
-            const response = await fetch("/api/auth/reset-password", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token, password: values.password }),
-            });
 
-            const data = await response.json();
-
-            if (!response.ok) throw new Error(data.error || "Failed to reset password");
-
+            const { data, error } = await resetPassword({
+                newPassword: values.password,
+                token
+            })
+            if (error) throw error;
             setSuccess(true);
         } catch (err: any) {
-            setError(err.message);
+            toast.error("Password reset failed", {
+                duration: 5000,
+                description: err.message || 'An error occurred',
+            });
+            setError(err.message || 'An error occurred');
         } finally {
             setIsLoading(false);
         }
@@ -80,7 +85,7 @@ export default function ResetPassword() {
                     <p className="text-gray-600 mt-4 mb-8">
                         Your password has been updated successfully.
                     </p>
-                    <Button asChild className="w-full h-12 text-lg">
+                    <Button asChild className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-900">
                         <Link href="/login">Sign In Now</Link>
                     </Button>
                 </div>

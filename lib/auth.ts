@@ -38,7 +38,9 @@ export const auth = betterAuth({
                 console.log(error);
                 throw error
             }
-        }
+        },
+        resetPasswordTokenExpiresIn: 3600,
+        revokeSessionsOnPasswordReset: true
     },
     emailVerification: {
         sendOnSignUp: true,
